@@ -1,6 +1,8 @@
 ## Introdução
 
+Projeto Fullstack demo para gerenciar empresas, fornecedores e relações de fornecimento.
 
+[Modelagem relacional](https://lucid.app/lucidchart/b49cb765-da30-4ad1-8be2-ec2058ff7da7/edit?invitationId=inv_47890e16-c14b-437f-84cc-b56f20415a97)
 
 ## Tecnologias
 
@@ -31,14 +33,14 @@ MYSQL_ROOT_PASSWORD=senhasecreta
 ```
 1. Inicie a Docker Engine.
 2. Rode `docker-compose -f docker-compose.yaml up -d` e espere a build terminar.
-3. Acesse `http://localhost:8080/` para usar o aplicativo (frontend).
-4. Acesse `http://localhost:8081/` no browser para visualizar o banco de dados.
-5. A API de acesso ao banco de dados pode ser acessada em `http://localhost:8082/`. Veja `api-server/src/main/java/projeto_fullstack/api/resource/` para descobrir quais são os endpoints.
-6. Para modificar o código fonte, rebuildar e ver as mudanças, é necessário executar `docker-compose up` novamente indicando que as imagens devem ser recriadas: `docker-compose -f docker-compose.yaml up -d --build api frontend`. Não é necessário rodar `docker-compose down` previamente.
+3. Abra um terminal na pasta `client` e execute `npm install` e `npm run dev`.
+4. Acesse `http://localhost:8080/` para usar o aplicativo (frontend).
+5. Acesse `http://localhost:8081/` no browser para visualizar o banco de dados e adicionar dados.
+6. A API de acesso ao banco de dados pode ser acessada em `http://localhost:8082/`. Veja `api-server/src/main/java/projeto_fullstack/api/resource/` para descobrir quais são os endpoints.
 7. Ao terminar de usar, execute `docker-compose -f docker-compose.yaml down`.
 
-## Possíveis pontos de melhoria
-Para que o projeto esteja pronto para produção, ainda é necessário desenvolver os seguintes pontos:
+## Pontos de melhoria
+- Os CRUDS no frontend não estão finalizados.
 - Configurar logging e monitoramento no servidor da API.
 - Configurar autenticação e autorização com JWT no servidor da API (possivelmente escrevendo ou usando um outro servidor para autenticar e autorizar usuários da organização).
 - Escrever uma documentação da API.
