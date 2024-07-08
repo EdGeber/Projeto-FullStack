@@ -1,0 +1,52 @@
+# Dados sensíveis não devem ser enviados ao repositório.
+# Defina um arquivo .env para carregá-los
+x-common-variables: &common-variables
+  MYSQL_DATABASE: $MYSQL_DATABASE
+  MYSQL_USER: $MYSQL_USER
+  MYSQL_PASSWORD: $MYSQL_PASSWORD
+
+services:
+  db:
+    # usar uma versão específica (em vez de 'latest')
+    # promove builds mais reprodutíveis
+    image: 'mysql:9.0.0'
+    restart: always
+    environment:
+      <<: *common-variables
+      MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+    volumes:
+      - db-data:/var/lib/mysql
+    # A porta do banco de dados não deve ser exposta
+    # porque a conexão entre o mundo externo (internet)
+    # e o banco de dados deve ser mediada pela API.
+  
+  # interface para acessar o mysql durante desenvolvimento
+  adminer:
+    image: adminer:4.8.1-standalone
+    restart: always
+    ports:
+      - 8081:8080
+
+  api:
+    build: ./api-server
+    restart: no
+    depends_on:
+      - db
+    environment:
+      <<: *common-variables
+      MYSQL_DB_URL: jdbc:mysql://db:3306/$MYSQL_DATABASE
+    ports:
+      - 8082:8080
+  
+  # roteamento nao esta funcionando
+  #frontend:
+  #  build: ./client
+  #  restart: always
+  #  depends_on:
+  #    - api
+  #  ports:
+  #    - 8080:8080
+    
+
+volumes:
+  db-data: {}
