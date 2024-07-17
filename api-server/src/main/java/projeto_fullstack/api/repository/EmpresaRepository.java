@@ -1,7 +1,6 @@
 package projeto_fullstack.api.repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,9 +17,9 @@ public interface EmpresaRepository extends JpaRepository<Empresa, Long> {
 	@Query(value = "SELECT * FROM empresa WHERE nome_fantasia > ?1 ORDER BY nome_fantasia LIMIT ?2", nativeQuery = true)
 	public Iterable<Empresa> getPage(String lastSeenName, int limit);
 
-	public Optional<Empresa> findByCnpj(String cnpj);
-	
+	public List<Empresa> findByCnpj(String cnpj);
+
 	public List<Empresa> findByNomeFantasiaContaining(String nome);
-	
+
 	public List<Empresa> findByCnpjContaining(String cnpj);
 }

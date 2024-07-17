@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
-@Constraint(validatedBy = FornecedorPessoaFisicaNascimentoValidator.class)
+@Constraint(validatedBy = FornecedorPessoaFisicaRgValidator.class)
 @Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface FornecedorPessoaFisicaRgConstraint {

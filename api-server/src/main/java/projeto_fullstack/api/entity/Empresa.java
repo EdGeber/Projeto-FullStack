@@ -12,14 +12,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import projeto_fullstack.api.error.cep.CepConstraint;
 import projeto_fullstack.api.error.cnpj.CnpjConstraint;
-import projeto_fullstack.api.error.empresa.EmpresaCnpjUnicoConstraint;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @Table(name = "Empresa")
-@EmpresaCnpjUnicoConstraint
 //Veja squema.sql
 public class Empresa {
 	@Id

@@ -10,11 +10,11 @@ public class CadastroValidator implements ConstraintValidator<CadastroConstraint
 	private static final Pattern CPF_PATTERN = Pattern.compile("^\\d{11}$");
 
 	public static boolean isCnpjValid(String cnpj) {
-		return CNPJ_PATTERN.matcher(cnpj).matches();
+		return cnpj != null && CNPJ_PATTERN.matcher(cnpj).matches();
 	}
 
 	public static boolean isCpfValid(String cpf) {
-		return CPF_PATTERN.matcher(cpf).matches();
+		return cpf != null && CPF_PATTERN.matcher(cpf).matches();
 	}
 	
 	public static boolean isCadastroValid(String cadastro) {

@@ -19,7 +19,7 @@ import projeto_fullstack.api.repository.FornecimentoRepository;
 @CrossOrigin // apagar isso em producao. Deixar apenas para desenvolvimento
 public class FornecimentoResource {
 	@Autowired
-	public static FornecimentoRepository fornecimentoRepository;
+	FornecimentoRepository fornecimentoRepository;
 
 	@ResponseBody
 	@DeleteMapping(path = "{id}")

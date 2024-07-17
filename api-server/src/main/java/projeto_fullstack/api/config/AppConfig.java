@@ -17,8 +17,8 @@ public class AppConfig {
 	@Bean
 	public MessageSource messageSource() {
 		ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-		messageSource.setBasename("messages");
-		messageSource.setDefaultEncoding("UTF-8");
+		messageSource.setBasename("classpath:ValidationMessages");
+		messageSource.setDefaultEncoding("ISO-8859-1");
 		return messageSource;
 	}
 
@@ -30,4 +30,6 @@ public class AppConfig {
 		bean.setValidationMessageSource(messageSource());
 		return bean;
 	}
+
+	
 }

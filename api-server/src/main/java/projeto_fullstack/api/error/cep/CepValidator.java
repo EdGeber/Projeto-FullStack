@@ -7,17 +7,19 @@ import java.util.regex.Pattern;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import projeto_fullstack.api.ProjetoFullstackApiApplication;
+import projeto_fullstack.api.service.ApplicationContextService;
 
 public class CepValidator implements ConstraintValidator<CepConstraint, String> {
 	private static final Pattern CEP_PATTERN = Pattern.compile("^\\d{8}$");
 	private static final String CEP_API_URL_TEMPLATE = "https://viacep.com.br/ws/{cep}/json/";
 
 	public static ResponseEntity<Map<String, String>> getCepData(String cep) {
-		return ProjetoFullstackApiApplication.webClient.get().uri(CEP_API_URL_TEMPLATE, cep).retrieve()
+		WebClient webClient = ApplicationContextService.getApplicationContext().getBean(WebClient.class);
+		return webClient.get().uri(CEP_API_URL_TEMPLATE, cep).retrieve()
 				.toEntity(new ParameterizedTypeReference<Map<String, String>>() {
 				}).block(Duration.ofSeconds(5));
 	}
@@ -36,7 +38,7 @@ public class CepValidator implements ConstraintValidator<CepConstraint, String> 
 
 	@Override
 	public boolean isValid(String cep, ConstraintValidatorContext ctx) {
-		if (!CEP_PATTERN.matcher(cep).matches()) {
+		if (cep == null || !CEP_PATTERN.matcher(cep).matches()) {
 			return false;
 		}
 		ResponseEntity<Map<String, String>> re = getCepData(cep);

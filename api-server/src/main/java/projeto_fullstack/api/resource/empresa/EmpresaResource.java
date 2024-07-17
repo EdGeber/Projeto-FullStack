@@ -29,6 +29,7 @@ import org.springframework.web.server.ResponseStatusException;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import projeto_fullstack.api.entity.Empresa;
+import projeto_fullstack.api.entity.Fornecedor;
 import projeto_fullstack.api.entity.Fornecimento;
 import projeto_fullstack.api.error.ErrorObject;
 import projeto_fullstack.api.repository.EmpresaRepository;
@@ -42,21 +43,43 @@ public class EmpresaResource {
 	@Autowired
 	MessageSource messageSource;
 	@Autowired
-	public static EmpresaRepository empresaRepository;
+	EmpresaRepository empresaRepository;
 	@Autowired
-	public static FornecimentoRepository fornecimentoRepository;
+	FornecimentoRepository fornecimentoRepository;
+
+	Boolean isCnpjUnique(Empresa empresa) {
+		List<Empresa> empresas = empresaRepository.findByCnpj(empresa.getCnpj());
+		return (empresas == null) || (empresas.size() == 0) || (!empresas.get(0).getCnpj().equals(empresa.getCnpj()))
+				|| (empresas.get(0).getId() == empresa.getId());
+	}
+
+	ResponseEntity<Object> getCnpjExistsErrorResponse() {
+		Map<String, String> fieldErrors = new HashMap<>();
+		List<String> businessErrors = new ArrayList<String>();
+		// TODO usar locale da requisicao
+		fieldErrors.put("cnpj", messageSource.getMessage("cnpjExistsEmpresa", null, Locale.of("PT")));
+		return new ResponseEntity<>(new ErrorObject(fieldErrors, businessErrors), HttpStatus.BAD_REQUEST);
+	}
 
 	@ResponseBody
 	@PostMapping(path = "")
-	public PostEmpresaResponse create(@Valid @RequestBody PostEmpresaRequest reqObj) {
+	// PostEmpresaResponse if no error
+	public ResponseEntity<Object> create(@Valid @RequestBody PostEmpresaRequest reqObj) {
 		Empresa empresa = reqObj.getEmpresa();
-		List<Long> fornecedorIds = reqObj.getFornecedorIds();
+
+		if(!isCnpjUnique(empresa)) {
+			return getCnpjExistsErrorResponse();
+		}
+
 		Long id = empresaRepository.save(empresa).getId();
+
+		List<Long> fornecedorIds = reqObj.getFornecedorIds();
 		List<Long> fornecimentoIds = null;
 		if (fornecedorIds != null) {
 			fornecimentoIds = addFornecedores(id, fornecedorIds);
 		}
-		return new PostEmpresaResponse(id, fornecimentoIds);
+
+		return new ResponseEntity<>(new PostEmpresaResponse(id, fornecimentoIds), HttpStatus.OK);
 	}
 
 	@ResponseBody
@@ -78,6 +101,7 @@ public class EmpresaResource {
 
 	@ResponseBody
 	@PutMapping(path = "{id}")
+	// empty response if no error
 	public ResponseEntity<Object> put(@PathVariable("id") Long id, @Valid @RequestBody Empresa empresa) {
 		if (id != empresa.getId()) {
 			Map<String, String> fieldErrors = new HashMap<>();
@@ -86,6 +110,11 @@ public class EmpresaResource {
 			businessErrors.add(messageSource.getMessage("idsDontMatch", null, Locale.of("PT")));
 			return new ResponseEntity<>(new ErrorObject(fieldErrors, businessErrors), HttpStatus.BAD_REQUEST);
 		}
+		
+		if(!isCnpjUnique(empresa)) {
+			return getCnpjExistsErrorResponse();
+		}
+		
 		empresa = empresaRepository.save(empresa);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}

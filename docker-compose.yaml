@@ -22,7 +22,7 @@ services:
   
   # interface para acessar o mysql durante desenvolvimento
   adminer:
-    image: adminer:4.8.1-standalone
+    image: 'adminer:4.8.1-standalone'
     restart: always
     ports:
       - 8081:8080

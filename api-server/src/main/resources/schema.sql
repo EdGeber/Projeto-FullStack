@@ -1,6 +1,8 @@
--- DROP TABLE IF EXISTS empresa;  -- comente essa linha se nao quiser deletar os dados
+DROP TABLE IF EXISTS fornecimento;
+
+DROP TABLE IF EXISTS empresa;  -- comente essa linha se nao quiser deletar os dados
 CREATE TABLE IF NOT EXISTS empresa (
-	id BIGINT NOT NULL,
+	id BIGINT NOT NULL AUTO_INCREMENT,
 	cnpj VARCHAR(14) NOT NULL UNIQUE,
 	nome_fantasia VARCHAR(255) NOT NULL,
 	cep VARCHAR(8) NOT NULL,
@@ -9,9 +11,9 @@ CREATE TABLE IF NOT EXISTS empresa (
 	INDEX empresa_nome_ind (nome_fantasia)  -- para otimizar filtragem e paginacao por nome
 ) ENGINE=INNODB;
 
--- DROP TABLE IF EXISTS fornecedor;
+DROP TABLE IF EXISTS fornecedor;
 CREATE TABLE IF NOT EXISTS fornecedor (
-	id BIGINT NOT NULL,
+	id BIGINT NOT NULL AUTO_INCREMENT,
 	cadastro VARCHAR(14) NOT NULL UNIQUE,
 	rg VARCHAR(11) UNIQUE,
 	data_nascimento DATE,
@@ -24,9 +26,8 @@ CREATE TABLE IF NOT EXISTS fornecedor (
 	INDEX fornecedor_cadastro_ind (cadastro)  -- para otimizar a filtragem por cadastro
 ) ENGINE=INNODB;
 
--- DROP TABLE IF EXISTS fornecimento;
 CREATE TABLE IF NOT EXISTS fornecimento (
-	id BIGINT NOT NULL,
+	id BIGINT NOT NULL AUTO_INCREMENT,
 	empresa_id BIGINT NOT NULL,
 	fornecedor_id BIGINT NOT NULL,
 	

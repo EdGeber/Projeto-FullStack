@@ -10,8 +10,8 @@ import projeto_fullstack.api.entity.Empresa;
 
 @Data
 public class PostEmpresaRequest {
-	@NotNull
 	@JsonProperty(required = true)
+	@NotNull
 	Empresa empresa;
 	@JsonProperty(required = false)
 	List<Long> fornecedorIds;

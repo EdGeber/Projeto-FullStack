@@ -1,5 +1,7 @@
 package projeto_fullstack.api.error;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,19 +49,21 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 			Map<String, String> fieldErrors = new HashMap<>();
 			List<String> businessErrors = new ArrayList<String>();
 			e.getConstraintViolations().forEach(constraintViolation -> {
-				businessErrors.add(constraintViolation.getMessage());
+				fieldErrors.put(constraintViolation.getPropertyPath().toString(), constraintViolation.getMessage());
 			});
 			return new ResponseEntity<>(new ErrorObject(fieldErrors, businessErrors), HttpStatus.BAD_REQUEST);
 		} else {
 			// Caso o erro não seja de nenhum dos tipos acima, isso
 			// indica um bug
 			// TODO: salvar num arquivo de log
-			log.debug("REQUEST THAT CAUSED THE ERROR: ");
+			log.debug("REQUEST THAT CAUSED THE ERROR:");
 			log.debug(request.toString());
-			log.debug("ERROR: ");
-			log.debug(ex.toString());
-			log.debug("CAUSE: ");
-			log.debug(ex.getCause().toString());
+			log.debug("STACK TRACE: ");
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			PrintStream printStream = new PrintStream(outputStream);
+			ex.printStackTrace(printStream);
+			log.debug(outputStream.toString());
+			log.debug("END OF STACK TRACE");
 			// sempre retorna INTERNAL SERVER ERROR em caso de uma exceção inesperada
 			ResponseStatusException e = new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
 			return handleExceptionInternal(e, null, e.getHeaders(), e.getStatusCode(), request);

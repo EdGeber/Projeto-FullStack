@@ -42,25 +42,47 @@ public class FornecedorResource {
 	@Autowired
 	MessageSource messageSource;
 	@Autowired
-	public static FornecedorRepository fornecedorRepository;
+	FornecedorRepository fornecedorRepository;
 	@Autowired
-	public static FornecimentoRepository fornecimentoRepository;
+	FornecimentoRepository fornecimentoRepository;
+
+	Boolean isCadastroUnique(Fornecedor fornecedor) {
+		List<Fornecedor> fornecedores = fornecedorRepository.findByCadastro(fornecedor.getCadastro());
+		return (fornecedores == null) || (fornecedores.size() == 0)
+				|| (!fornecedores.get(0).getCadastro().equals(fornecedor.getCadastro()))
+				|| (fornecedores.get(0).getId() == fornecedor.getId());
+	}
+	
+	ResponseEntity<Object> getCadastroExistsErrorResponse() {
+		Map<String, String> fieldErrors = new HashMap<>();
+		List<String> businessErrors = new ArrayList<String>();
+		// TODO usar locale da requisicao
+		fieldErrors.put("cadastro", messageSource.getMessage("cadastroExistsFornecedor", null, Locale.of("PT")));
+		return new ResponseEntity<>(new ErrorObject(fieldErrors, businessErrors), HttpStatus.BAD_REQUEST);
+	}
 
 	@ResponseBody
 	@PostMapping(path = "")
-	public PostFornecedorResponse create(@Valid @RequestBody PostFornecedorRequest reqObj) {
+	// PostFornecedorResponse if no error
+	public ResponseEntity<Object> create(@Valid @RequestBody PostFornecedorRequest reqObj) {
 		Fornecedor fornecedor = reqObj.getFornecedor();
-		List<Long> empresaIds = reqObj.getEmpresaIds();
+
+		if (!isCadastroUnique(fornecedor)) {
+			return getCadastroExistsErrorResponse();
+		}
+
 		Long id = fornecedorRepository.save(fornecedor).getId();
+
+		List<Long> empresaIds = reqObj.getEmpresaIds();
 		List<Long> fornecimentoIds = null;
 		if (empresaIds != null) {
 			fornecimentoIds = addEmpresas(id, empresaIds);
 		}
-		return new PostFornecedorResponse(id, fornecimentoIds);
+		return new ResponseEntity<>(new PostFornecedorResponse(id, fornecimentoIds), HttpStatus.OK);
 	}
 
 	@ResponseBody
-	@PostMapping(path = "{id}/empresas")
+	@PostMapping(path = "{id}/fornecimentos")
 	public List<Long> addEmpresas(@PathVariable("id") Long id, @RequestBody List<Long> empresaIds) {
 		if (!fornecedorRepository.existsById(id)) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -86,6 +108,11 @@ public class FornecedorResource {
 			businessErrors.add(messageSource.getMessage("idsDontMatch", null, Locale.of("PT")));
 			return new ResponseEntity<>(new ErrorObject(fieldErrors, businessErrors), HttpStatus.BAD_REQUEST);
 		}
+		
+		if (!isCadastroUnique(fornecedor)) {
+			return getCadastroExistsErrorResponse();
+		}
+		
 		fornecedor = fornecedorRepository.save(fornecedor);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
