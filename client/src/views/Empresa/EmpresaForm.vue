@@ -87,7 +87,7 @@
             alert("Empresa deletada com sucesso.");
             router.replace("/empresa");
         } catch (error) {
-            alert("Ocorreu um erro inesperado. Tente novamente.");
+            alert("Ocorreu um erro. Tente novamente.");
             console.log(error);
         } finally {
             loading.value = false;
@@ -96,7 +96,7 @@
 </script>
 
 <template>
-    <div id="container" class="flex flex-1 flex-col justify-evenly items-center flex-nowrap gap-14">
+    <div id="container" class="flex flex-1 flex-col justify-evenly items-center flex-nowrap gap-14 my-10">
         <h1 class="text-4xl pb-10">Empresa</h1>
 
         <i v-if="loading" class="pi pi-spin pi-spinner-dotted self-center text-emerald-600" style="font-size: 2rem"></i>

@@ -60,6 +60,21 @@ public class FornecedorResource {
 		fieldErrors.put("cadastro", messageSource.getMessage("cadastroExistsFornecedor", null, Locale.of("PT")));
 		return new ResponseEntity<>(new ErrorObject(fieldErrors, businessErrors), HttpStatus.BAD_REQUEST);
 	}
+	
+	Boolean isRgUnique(Fornecedor fornecedor) {
+		List<Fornecedor> fornecedores = fornecedorRepository.findByCadastro(fornecedor.getCadastro());
+		return (fornecedores == null) || (fornecedores.size() == 0)
+				|| (!fornecedores.get(0).getCadastro().equals(fornecedor.getCadastro()))
+				|| (fornecedores.get(0).getId() == fornecedor.getId());
+	}
+	
+	ResponseEntity<Object> getRgExistsErrorResponse() {
+		Map<String, String> fieldErrors = new HashMap<>();
+		List<String> businessErrors = new ArrayList<String>();
+		// TODO usar locale da requisicao
+		fieldErrors.put("cadastro", messageSource.getMessage("cadastroExistsFornecedor", null, Locale.of("PT")));
+		return new ResponseEntity<>(new ErrorObject(fieldErrors, businessErrors), HttpStatus.BAD_REQUEST);
+	}
 
 	@ResponseBody
 	@PostMapping(path = "")
