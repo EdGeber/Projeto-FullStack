@@ -78,6 +78,9 @@
             }
             console.log(response);
             alert("Forecedor salvo com sucesso.");
+            if(response?.data?.fornecedorId) {
+                router.replace(`/fornecedor/${response.data.fornecedorId}`);
+            }
         } catch (error) {
             alert("Ocorreu um erro. Tente novamente.");
             console.log(error);
