@@ -8,11 +8,11 @@
     const items = [
         {
             label: "Empresas",
-            url: "/empresas"
+            url: "/empresa"
         },
         {
             label: "Fornecedores",
-            url: "/fornecedores"
+            url: "/fornecedor"
         }
     ];
 </script>

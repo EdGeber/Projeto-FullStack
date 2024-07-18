@@ -1,5 +1,5 @@
 <script setup lang="ts">
-    import { ref, onMounted, computed } from 'vue';
+    import { ref, onMounted } from 'vue';
     import axios from 'axios';
     import { useRouter } from 'vue-router';
 
@@ -14,18 +14,15 @@
     }>();
 
     const apiUrl = import.meta.env.VITE_API_URL;
-    let initialLoading = ref(true);
-    let hasError = ref(false);
-    let objs = ref([]);
+    const initialLoading = ref(true);
+    const hasError = ref(false);
+    const objs = ref([]);
 
     onMounted(async () => {
         try {
             const response = await axios.get(`${apiUrl}/${props.entity}/page`);
             objs.value = response.data;
             hasError.value = false;
-            console.log(objs);
-            console.log(props.colAttrs);
-            console.log(props.colNames);
         } catch (error) {
             hasError.value = true;
             alert("Ocorreu um erro inesperado.");
@@ -35,15 +32,27 @@
         }
     });
 
-    function handleRowClick(id: number) {
-        console.log(id);
+    function handleEditClick(id: number) {
+        router.push(`${props.entity}/${id}`);
+    }
+
+    function handleAddClick(event: Event) {
+        router.push(`${props.entity}/novo`);
     }
 </script>
 
 <template>
     <div class="flex flex-1 flex-row justify-center h-full">
         <div class="flex flex-col flex-nowrap justify-start items-start gap-10 w-fit my-20">
-            <h1 class="text-3xl">{{ title }}</h1>
+            <div class="flex w-full flex-row justify-between items-baseline">
+                <h1 class="text-3xl">{{ title }}</h1>
+                <button
+                    class="bg-blue-600 hover:bg-blue-400 p-2 content-center items-center rounded"
+                    @click="handleAddClick"
+                >
+                    <i class="pi pi-plus" style="font-size: 1.5rem"></i>
+                </button>
+            </div>
             <i v-if="initialLoading" class="pi pi-spin pi-spinner-dotted self-center text-emerald-600" style="font-size: 2rem"></i>
             <i v-if="hasError" class="pi pi-times self-center text-red-600" style="font-size: 2rem"></i>
 
@@ -57,7 +66,7 @@
                 </thead>
 
                 <tbody>
-                    <tr class="data-row" v-for="obj in objs" :key="obj['id']" @click="handleRowClick(obj['id'])">
+                    <tr class="data-row" v-for="obj in objs" :key="obj['id']" @click="handleEditClick(obj['id'])">
                         <td v-for="attr in props.colAttrs" :key="attr">
                             {{ obj[attr] }}
                         </td>
@@ -70,7 +79,7 @@
 </template>
 
 <style>
-
+/* TODO: replace with tailwind */
 table {
   border-collapse: collapse;
   width: 100%;

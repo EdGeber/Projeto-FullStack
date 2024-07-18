@@ -5,6 +5,7 @@ import EmpresaForm from "@/views/Empresa/EmpresaForm.vue";
 import EmpresaTable from "@/views/Empresa/EmpresaTable.vue";
 import FornecedorForm from "@/views/Fornecedor/FornecedorForm.vue";
 import FornecedorTable from "@/views/Fornecedor/FornecedorTable.vue";
+import PageNotFound from "@/views/PageNotFound.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -15,39 +16,43 @@ const router = createRouter({
             component: HomeView
         },
         {
-            path: '/empresas',
+            path: '/empresa',
             name: 'empresas',
             component: EmpresaTable
         },
         {
-            path: '/empresas/novo',
+            path: '/empresa/novo',
             name: 'novaEmpresa',
             component: EmpresaForm,
             props: true
         },
         {
-            path: '/empresas/:id',
+            path: '/empresa/:id',
             name: 'empresaForm',
             component: EmpresaForm,
             props: true
         },
         {
-            path: '/fornecedores',
+            path: '/fornecedor',
             name: 'fornecedores',
             component: FornecedorTable
         },
         {
-            path: '/fornecedores/novo',
+            path: '/fornecedor/novo',
             name: 'novoFornecedor',
             component: FornecedorForm,
             props: true
         },
         {
-            path: '/fornecedores/:id',
+            path: '/fornecedor/:id',
             name: 'fornecedorForm',
             component: FornecedorForm,
             props: true
         },
+        {
+            path: "/:pathMatch(.*)*",
+            component: PageNotFound
+        }
     ]
 });
 

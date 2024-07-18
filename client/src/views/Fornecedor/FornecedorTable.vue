@@ -7,6 +7,6 @@
         title="Fornecedores"
         entity="fornecedor"
         :colAttrs="['nome', 'email', 'cadastro', 'rg', 'dataNascimento', 'cep']"
-        :colNames="['Nome', 'email', 'CNPJ ou CPF', 'RG', 'Data de nascimento', 'CEP']"
+        :colNames="['Nome', 'Email', 'CNPJ ou CPF', 'RG', 'Data de nascimento', 'CEP']"
     />
 </template>
