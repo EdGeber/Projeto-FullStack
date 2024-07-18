@@ -29,11 +29,11 @@ import org.springframework.web.server.ResponseStatusException;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import projeto_fullstack.api.entity.Empresa;
-import projeto_fullstack.api.entity.Fornecedor;
 import projeto_fullstack.api.entity.Fornecimento;
 import projeto_fullstack.api.error.ErrorObject;
 import projeto_fullstack.api.repository.EmpresaRepository;
 import projeto_fullstack.api.repository.FornecimentoRepository;
+import projeto_fullstack.api.repository.FornecimentoService;
 
 @RestController
 @RequestMapping(path = "/empresa")
@@ -46,6 +46,8 @@ public class EmpresaResource {
 	EmpresaRepository empresaRepository;
 	@Autowired
 	FornecimentoRepository fornecimentoRepository;
+	@Autowired
+	FornecimentoService fornecimentoService;
 
 	Boolean isCnpjUnique(Empresa empresa) {
 		List<Empresa> empresas = empresaRepository.findByCnpj(empresa.getCnpj());
@@ -126,9 +128,9 @@ public class EmpresaResource {
 		Optional<Empresa> result = empresaRepository.findById(id);
 		if (result.isPresent()) {
 			Empresa empresa = result.get();
-			List<Fornecimento> fornecimentos = null;
+			List<Map<String, Object>> fornecimentos = null;
 			if (fornecedores) {
-				fornecimentos = fornecimentoRepository.getFornecedores(id);
+				fornecimentos = fornecimentoService.getFornecedores(id);
 			}
 			return new GetEmpresaResponse(empresa, fornecimentos);
 		} else {

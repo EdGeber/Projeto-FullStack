@@ -3,8 +3,15 @@
     import axios from 'axios';
     import InputText from 'primevue/inputtext';
     import FloatLabel from 'primevue/floatlabel';
-    import * as Types from '@/types/Empresa/types';
+    import * as EmpresaTypes from '@/types/Empresa/types';
+    import * as FornecedorTypes from '@/types/Fornecedor/types';
     import { useRouter } from 'vue-router';
+    import MultiSelect from 'primevue/multiselect';
+
+    interface FornecedorOption {
+        fornecedorId: number, // id
+        fornecedorNome: string  // nome
+    }
 
     axios.defaults.headers.common['Content-Type'] = 'application/json';
     const router = useRouter();
@@ -20,54 +27,92 @@
     const nomeFantasia = ref('');
     const cnpj = ref('');
     const cep = ref('');
-    const fornecimentos = ref<Types.FornecimentoEmpresa[]>([]);
+    let currentFornecedores: EmpresaTypes.FornecimentoEmpresa[] = [];
+    const selectedFornecedores = ref<number[]>([]);
+    // deve ser ref porque pode ser alterado dinamicamente ao implementarmos paginacao
+    const fornecedorOptions = ref<FornecedorOption[]>([]);
 
     onMounted(async () => {
-        if(props.id === undefined) {
-            loading.value = false;
-        } else {
-            try {
-                const response = await axios.get<Types.GetEmpresaResponse>(`${apiUrl}/empresa/${props.id}`);
-                console.log(response);
-                cnpj.value = response.data.empresa.cnpj;
-                nomeFantasia.value = response.data.empresa.nomeFantasia;
-                cep.value = response.data.empresa.cep;
-                fornecimentos.value = response.data.fornecimentos ?? [];
-                hasError.value = false;
-            } catch (error) {
-                hasError.value = true;
-                alert("Ocorreu um erro inesperado.");
-                console.log(error);
-            } finally {
-                loading.value = false;
+        try {
+            const fornecedoresResponse = await axios.get<FornecedorTypes.GetFornecedoresResponse>(`${apiUrl}/fornecedor/page`);
+            console.log(fornecedoresResponse);
+            fornecedorOptions.value = fornecedoresResponse.data.map(
+                forn => { return {fornecedorId: forn.id, fornecedorNome: forn.nome} }
+            );
+
+            if(props.id !== undefined) {
+                const empresaResponse = await axios.get<EmpresaTypes.GetEmpresaResponse>(`${apiUrl}/empresa/${props.id}?fornecedores=true`);
+                console.log(empresaResponse);
+
+                cnpj.value = empresaResponse.data.empresa.cnpj;
+                nomeFantasia.value = empresaResponse.data.empresa.nomeFantasia;
+                cep.value = empresaResponse.data.empresa.cep;
+
+                currentFornecedores = empresaResponse.data.fornecimentos ?? [];
+                selectedFornecedores.value = currentFornecedores.map(
+                    forn => forn.fornecedorId
+                );
             }
+
+            hasError.value = false;
+        } catch (error) {
+            hasError.value = true;
+            alert("Ocorreu um erro inesperado.");
+            console.log(error);
+        } finally {
+            loading.value = false;
         }
     });
 
     async function save() {
         try {
             loading.value = true;
-            const empresaData: Types.EmpresaDataFields = {
+            const empresaData: EmpresaTypes.EmpresaDataFields = {
                 cnpj: cnpj.value,
                 nomeFantasia: nomeFantasia.value,
                 cep: cep.value
             };
             var response;
             if(props.id === undefined) {
-                const body: Types.PostEmpresaRequest = {
+                // post
+                const body: EmpresaTypes.PostEmpresaRequest = {
                     empresa: empresaData,
-                    fornecedorIds: fornecimentos.value.map(forn => forn.id)
+                    fornecedorIds: selectedFornecedores.value
                 };
-                response = await axios.post(`${apiUrl}/empresa`, body);
+                response = await axios.post<EmpresaTypes.PostEmpresaRequest, {data: EmpresaTypes.PostEmpresaResponse}>(`${apiUrl}/empresa`, body);
             } else {
-                const body: Types.PutEmpresaRequest = {
+                // put
+                const body: EmpresaTypes.PutEmpresaRequest = {
                     id: Number(props.id),
                     ...empresaData
                 };
-                response = await axios.put(`${apiUrl}/empresa/${props.id}`, body);
+                // deletar os que estao em current mas nao em selected
+                // TODO: melhorar a performance, porque isso tem complexidade de tempo quadratica
+                const fornecedorIdsToDelete = currentFornecedores.filter(
+                    currForn => !selectedFornecedores.value.some(selectedFornId => selectedFornId === currForn.fornecedorId)
+                ).map(forn => forn.fornecedorId);
+                const fornecimentoIdsToDelete = currentFornecedores.filter(
+                    currForn => fornecedorIdsToDelete.some(fornId => fornId === currForn.fornecedorId)
+                ).map(currForn => currForn.id);
+                // adicionar os que estao em selected mas nao em current
+                // TODO: melhorar a performance, porque isso tem complexidade de tempo quadratica
+                const fornecedorIdsToAdd = selectedFornecedores.value.filter(
+                    selectedFornId => !currentFornecedores.some(currForn => currForn.fornecedorId === selectedFornId)
+                );
+                console.log(fornecedorIdsToDelete);
+                const [response, addResponse, deleteResponse] = await Promise.all([
+                    await axios.put(`${apiUrl}/empresa/${props.id}`, body),
+                    await axios.post(`${apiUrl}/empresa/${props.id}/fornecimentos`, fornecedorIdsToAdd),
+                    await axios.put(`${apiUrl}/fornecimento/delete`, fornecimentoIdsToDelete),
+                ]);
+                console.log(addResponse);
+                console.log(deleteResponse);
             }
             console.log(response);
             alert("Empresa salva com sucesso.");
+            if(response?.data?.empresaId) {
+                router.replace(`/empresa/${response.data.empresaId}`);
+            }
         } catch (error) {
             alert("Ocorreu um erro inesperado. Tente novamente.");
             console.log(error);
@@ -122,6 +167,26 @@
                 <label for="cep">CEP</label>
             </FloatLabel>
         </div>
+
+        <div class="flex flex-col gap-2 text-gray-400">
+            <FloatLabel>
+                <MultiSelect
+                    id="fornecedores"
+                    v-model="selectedFornecedores"
+                    :options="fornecedorOptions"
+                    optionValue="fornecedorId"
+                    optionLabel="fornecedorNome"
+                    filter
+                    :loading="loading"
+                    placeholder="Selecione fornecedores"
+                    :virtualScrollerOptions="{ itemSize: 44 }"
+                    variant="filled"
+                    :maxSelectedLabels="2"
+                    class="w-full md:w-80"
+                />
+                <label for="fornecedores">Fornecedores</label>
+            </FloatLabel>
+        </div>
         
         <div class="flex flex-row gap-10 justify-center">
             <button
@@ -139,6 +204,7 @@
                 Deletar
             </button>
         </div>
+
     </div>
 </template>
 

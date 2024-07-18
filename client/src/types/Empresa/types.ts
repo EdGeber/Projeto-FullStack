@@ -10,7 +10,7 @@ export interface Empresa extends EmpresaDataFields {
 
 export interface FornecimentoEmpresa {
     id: number,
-    fornecedorId: string,
+    fornecedorId: number,
     fornecedorNome: string
 }
 
@@ -19,9 +19,15 @@ export interface GetEmpresaResponse {
     fornecimentos: FornecimentoEmpresa[] | null
 }
 
+export type GetEmpresasResponse = Empresa[];
+
 export interface PutEmpresaRequest extends Empresa {}
 
 export interface PostEmpresaRequest {
     empresa: EmpresaDataFields,
     fornecedorIds?: number[]
+}
+
+export interface PostEmpresaResponse {
+    empresaId: number
 }

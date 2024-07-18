@@ -19,6 +19,8 @@ public interface FornecedorRepository extends JpaRepository<Fornecedor, Long> {
 	public Iterable<Fornecedor> getPage(String lastSeenName, int limit);
 
 	public List<Fornecedor> findByCadastro(String cadastro);
+	
+	public List<Fornecedor> findByRg(String rg);
 
 	public List<Empresa> findByNomeContaining(String nome);
 

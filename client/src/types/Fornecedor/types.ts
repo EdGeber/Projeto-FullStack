@@ -13,7 +13,7 @@ export interface Fornecedor extends FornecedorDataFields {
 
 export interface FornecimentoFornecedor {
     id: number,
-    empresaId: string,
+    empresaId: number,
     empresaNome: string
 }
 
@@ -21,6 +21,8 @@ export interface GetFornecedorResponse {
     fornecedor: Fornecedor,
     fornecimentos: FornecimentoFornecedor[] | null
 }
+
+export type GetFornecedoresResponse = Fornecedor[];
 
 export interface PutFornecedorRequest extends Fornecedor {}
 

@@ -33,6 +33,7 @@ import projeto_fullstack.api.entity.Fornecimento;
 import projeto_fullstack.api.error.ErrorObject;
 import projeto_fullstack.api.repository.FornecedorRepository;
 import projeto_fullstack.api.repository.FornecimentoRepository;
+import projeto_fullstack.api.repository.FornecimentoService;
 
 @RestController
 @RequestMapping(path = "/fornecedor")
@@ -45,6 +46,8 @@ public class FornecedorResource {
 	FornecedorRepository fornecedorRepository;
 	@Autowired
 	FornecimentoRepository fornecimentoRepository;
+	@Autowired
+	FornecimentoService fornecimentoService;
 
 	Boolean isCadastroUnique(Fornecedor fornecedor) {
 		List<Fornecedor> fornecedores = fornecedorRepository.findByCadastro(fornecedor.getCadastro());
@@ -62,9 +65,9 @@ public class FornecedorResource {
 	}
 	
 	Boolean isRgUnique(Fornecedor fornecedor) {
-		List<Fornecedor> fornecedores = fornecedorRepository.findByCadastro(fornecedor.getCadastro());
+		List<Fornecedor> fornecedores = fornecedorRepository.findByRg(fornecedor.getRg());
 		return (fornecedores == null) || (fornecedores.size() == 0)
-				|| (!fornecedores.get(0).getCadastro().equals(fornecedor.getCadastro()))
+				|| (!fornecedores.get(0).getRg().equals(fornecedor.getRg()))
 				|| (fornecedores.get(0).getId() == fornecedor.getId());
 	}
 	
@@ -72,7 +75,7 @@ public class FornecedorResource {
 		Map<String, String> fieldErrors = new HashMap<>();
 		List<String> businessErrors = new ArrayList<String>();
 		// TODO usar locale da requisicao
-		fieldErrors.put("cadastro", messageSource.getMessage("cadastroExistsFornecedor", null, Locale.of("PT")));
+		fieldErrors.put("cadastro", messageSource.getMessage("rgExistsFornecedor", null, Locale.of("PT")));
 		return new ResponseEntity<>(new ErrorObject(fieldErrors, businessErrors), HttpStatus.BAD_REQUEST);
 	}
 
@@ -84,6 +87,9 @@ public class FornecedorResource {
 
 		if (!isCadastroUnique(fornecedor)) {
 			return getCadastroExistsErrorResponse();
+		}
+		if(!isRgUnique(fornecedor)) {
+			return getRgExistsErrorResponse();
 		}
 
 		Long id = fornecedorRepository.save(fornecedor).getId();
@@ -127,6 +133,9 @@ public class FornecedorResource {
 		if (!isCadastroUnique(fornecedor)) {
 			return getCadastroExistsErrorResponse();
 		}
+		if(!isRgUnique(fornecedor)) {
+			return getRgExistsErrorResponse();
+		}
 		
 		fornecedor = fornecedorRepository.save(fornecedor);
 		return new ResponseEntity<>(HttpStatus.OK);
@@ -139,9 +148,9 @@ public class FornecedorResource {
 		Optional<Fornecedor> result = fornecedorRepository.findById(id);
 		if (result.isPresent()) {
 			Fornecedor fornecedor = result.get();
-			List<Fornecimento> fornecimentos = null;
+			List<Map<String, Object>> fornecimentos = null;
 			if (empresas) {
-				fornecimentos = fornecimentoRepository.getEmpresas(id);
+				fornecimentos = fornecimentoService.getEmpresas(id);
 			}
 			return new GetFornecedorResponse(fornecedor, fornecimentos);
 		} else {
